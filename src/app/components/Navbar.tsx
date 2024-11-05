@@ -9,7 +9,6 @@ import {
   LogOut, User, AlertCircle, Heart, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
 
 // Definición de tipos para los enlaces
 type NavLink = {
@@ -168,4 +167,8 @@ const Navbar = () => {
 export default Navbar;
 
 
+
+function useAuth(): { user: any; signOut: any; } {
+  throw new Error('Function not implemented.');
+}
 
