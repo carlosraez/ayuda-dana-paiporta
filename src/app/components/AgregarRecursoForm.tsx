@@ -8,8 +8,27 @@ import { Label } from '@/components/ui/label';
 import { PlusCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export default function AgregarRecursoForm({ onSubmit, tipo }) {
-  const [formData, setFormData] = useState({
+// Definir la estructura de datos para el formulario
+interface RecursoData {
+  id?: number;
+  tipo: string;
+  nombre: string;
+  descripcion: string;
+  cantidad: string;
+  ubicacion?: string;
+  contacto?: string;
+  prioridad?: string;
+  zona?: string;
+}
+
+// Definir los props de AgregarRecursoForm
+interface AgregarRecursoFormProps {
+  onSubmit: (data: RecursoData) => void;
+  tipo: string;
+}
+
+export default function AgregarRecursoForm({ onSubmit, tipo }: AgregarRecursoFormProps) {
+  const [formData, setFormData] = useState<RecursoData>({
     tipo: '',
     nombre: '',
     descripcion: '',
@@ -20,7 +39,7 @@ export default function AgregarRecursoForm({ onSubmit, tipo }) {
     zona: tipo === 'necesario' ? '' : undefined,
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({ ...formData, id: Date.now() });
     setFormData({
@@ -183,3 +202,4 @@ export default function AgregarRecursoForm({ onSubmit, tipo }) {
     </Dialog>
   );
 }
+

@@ -7,9 +7,21 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { HeartHandshake } from 'lucide-react';
 
+// Definir el tipo para las ofertas
+type Oferta = {
+  id: number;
+  tipo: string;
+  descripcion: string;
+  disponibilidad: string;
+  contacto: string;
+  estado: string;
+};
+
 export default function OfrezcoAyuda() {
-  const [ofertas, setOfertas] = useState([]);
-  const [newOferta, setNewOferta] = useState({
+  // Usa el tipo de Oferta en el estado
+  const [ofertas, setOfertas] = useState<Oferta[]>([]);
+  const [newOferta, setNewOferta] = useState<Oferta>({
+    id: 0,
     tipo: '',
     descripcion: '',
     disponibilidad: '',
@@ -17,10 +29,11 @@ export default function OfrezcoAyuda() {
     estado: 'disponible'
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setOfertas([...ofertas, { ...newOferta, id: Date.now() }]);
     setNewOferta({
+      id: 0,
       tipo: '',
       descripcion: '',
       disponibilidad: '',
@@ -140,3 +153,5 @@ export default function OfrezcoAyuda() {
     </div>
   );
 }
+
+

@@ -1,31 +1,45 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { HandHeart } from 'lucide-react';
+import * as React from "react";
+import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { HandHeart } from "lucide-react";
+
+// Define el tipo para las solicitudes
+type Solicitud = {
+  id: number;
+  tipo: string;
+  descripcion: string;
+  direccion: string;
+  contacto: string;
+  estado: string;
+};
 
 export default function NecesitoAyuda() {
-  const [solicitudes, setSolicitudes] = useState([]);
-  const [newSolicitud, setNewSolicitud] = useState({
-    tipo: '',
-    descripcion: '',
-    direccion: '',
-    contacto: '',
-    estado: 'pendiente'
+  // Usa el tipo de Solicitud en el estado
+  const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [newSolicitud, setNewSolicitud] = useState<Solicitud>({
+    id: 0,
+    tipo: "",
+    descripcion: "",
+    direccion: "",
+    contacto: "",
+    estado: "pendiente",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSolicitudes([...solicitudes, { ...newSolicitud, id: Date.now() }]);
     setNewSolicitud({
-      tipo: '',
-      descripcion: '',
-      direccion: '',
-      contacto: '',
-      estado: 'pendiente'
+      id: 0,
+      tipo: "",
+      descripcion: "",
+      direccion: "",
+      contacto: "",
+      estado: "pendiente",
     });
   };
 
@@ -44,10 +58,10 @@ export default function NecesitoAyuda() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Tipo de Ayuda</label>
-              <select 
+              <select
                 className="w-full p-2 border rounded-md"
                 value={newSolicitud.tipo}
-                onChange={(e) => setNewSolicitud({...newSolicitud, tipo: e.target.value})}
+                onChange={(e) => setNewSolicitud({ ...newSolicitud, tipo: e.target.value })}
                 required
               >
                 <option value="">Seleccione tipo de ayuda</option>
@@ -57,12 +71,12 @@ export default function NecesitoAyuda() {
                 <option value="otros">Otros</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-1">Descripción</label>
-              <Textarea 
+              <Textarea
                 value={newSolicitud.descripcion}
-                onChange={(e) => setNewSolicitud({...newSolicitud, descripcion: e.target.value})}
+                onChange={(e) => setNewSolicitud({ ...newSolicitud, descripcion: e.target.value })}
                 placeholder="Describa su necesidad en detalle"
                 required
                 className="min-h-[100px]"
@@ -71,9 +85,9 @@ export default function NecesitoAyuda() {
 
             <div>
               <label className="block text-sm font-medium mb-1">Dirección</label>
-              <Input 
+              <Input
                 value={newSolicitud.direccion}
-                onChange={(e) => setNewSolicitud({...newSolicitud, direccion: e.target.value})}
+                onChange={(e) => setNewSolicitud({ ...newSolicitud, direccion: e.target.value })}
                 placeholder="Calle, número, piso..."
                 required
               />
@@ -81,9 +95,9 @@ export default function NecesitoAyuda() {
 
             <div>
               <label className="block text-sm font-medium mb-1">Contacto</label>
-              <Input 
+              <Input
                 value={newSolicitud.contacto}
-                onChange={(e) => setNewSolicitud({...newSolicitud, contacto: e.target.value})}
+                onChange={(e) => setNewSolicitud({ ...newSolicitud, contacto: e.target.value })}
                 placeholder="Teléfono o email"
                 required
               />
@@ -99,7 +113,7 @@ export default function NecesitoAyuda() {
       {/* Lista de solicitudes */}
       <div className="space-y-4">
         <h2 className="text-xl font-bold text-gray-800">Mis Solicitudes</h2>
-        
+
         {solicitudes.length === 0 ? (
           <Card className="border-gray-200">
             <CardContent className="text-center p-6 text-gray-500">
@@ -123,11 +137,13 @@ export default function NecesitoAyuda() {
                       📞 {solicitud.contacto}
                     </p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    solicitud.estado === 'pendiente' 
-                      ? 'bg-yellow-100 text-yellow-800' 
-                      : 'bg-green-100 text-green-800'
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      solicitud.estado === "pendiente"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
                     {solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1)}
                   </span>
                 </div>

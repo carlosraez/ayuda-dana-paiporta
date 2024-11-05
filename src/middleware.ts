@@ -12,9 +12,6 @@ const protectedRoutes = [
   '/perfil'
 ];
 
-// Rutas públicas
-const publicRoutes = ['/', '/login'];
-
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth-token');
   const { pathname } = request.nextUrl;
