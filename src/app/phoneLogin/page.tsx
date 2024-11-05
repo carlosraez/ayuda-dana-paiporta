@@ -1,19 +1,50 @@
-import React, { useState } from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Phone, Lock, User, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+import { RecaptchaVerifier, ConfirmationResult } from 'firebase/auth';
+import { useAuth } from '@/contexts/AuthContext';
+
+
 const PhoneLogin = () => {
-  const [step, setStep] = useState('phone'); 
+  const [step, setStep] = useState('phone');
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const router = useRouter();
+  const { user, updateUserProfile } = useAuth();
 
-  const handlePhoneSubmit = async (e) => {
+  useEffect(() => {
+    if (user) {
+      router.push('/');
+    }
+  }, [user, router]);
+
+  useEffect(() => {
+    // Initialize reCAPTCHA when component mounts
+    if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'normal',
+        callback: () => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber
+        },
+        'expired-callback': () => {
+          setError('El captcha ha expirado. Por favor, inténtalo de nuevo.');
+        }
+      });
+    }
+  }, []);
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -27,18 +58,33 @@ const PhoneLogin = () => {
     }
 
     try {
-      // Aquí iría la llamada a tu API para enviar el SMS
-      // Por ahora simulamos un delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!window.recaptchaVerifier) {
+        throw new Error('reCAPTCHA no inicializado');
+      }
+
+      const formattedPhone = '+34' + phone;
+      const confirmation = await auth.signInWithPhoneNumber(
+        formattedPhone,
+        window.recaptchaVerifier
+      );
+      
+      setConfirmationResult(confirmation);
       setStep('verify');
-    } catch (err) {
-      setError('Error al enviar el código. Inténtalo de nuevo.');
+    } catch (err: any) {
+      console.error('Error al enviar SMS:', err);
+      setError('Error al enviar el código. Por favor, verifica el número e inténtalo de nuevo.');
+      
+      // Reset reCAPTCHA
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVerification = async (e) => {
+  const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -50,17 +96,21 @@ const PhoneLogin = () => {
     }
 
     try {
-      // Aquí iría la verificación del código
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!confirmationResult) {
+        throw new Error('No hay sesión de verificación activa');
+      }
+
+      await confirmationResult.confirm(code);
       setStep('profile');
-    } catch (err) {
-      setError('Código incorrecto. Inténtalo de nuevo.');
+    } catch (err: any) {
+      console.error('Error al verificar código:', err);
+      setError('Código incorrecto. Por favor, inténtalo de nuevo.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleProfileSubmit = async (e) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -72,11 +122,14 @@ const PhoneLogin = () => {
     }
 
     try {
-      // Aquí iría el guardado del perfil
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // Redirigir al usuario a la página principal o donde sea necesario
-      window.location.href = '/';
-    } catch (err) {
+      await updateUserProfile({
+        displayName: name,
+        createdAt: new Date().toISOString(),
+      });
+      
+      router.push('/');
+    } catch (err: any) {
+      console.error('Error al guardar perfil:', err);
       setError('Error al guardar el perfil. Inténtalo de nuevo.');
     } finally {
       setIsLoading(false);
@@ -120,6 +173,7 @@ const PhoneLogin = () => {
                   required
                 />
               </div>
+              <div id="recaptcha-container" className="mb-4"></div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Enviando...' : 'Enviar código'}
               </Button>
@@ -147,7 +201,13 @@ const PhoneLogin = () => {
                 type="button" 
                 variant="ghost" 
                 className="w-full"
-                onClick={() => setStep('phone')}
+                onClick={() => {
+                  setStep('phone');
+                  if (window.recaptchaVerifier) {
+                    window.recaptchaVerifier.clear();
+                    window.recaptchaVerifier = null;
+                  }
+                }}
               >
                 Cambiar número de teléfono
               </Button>
@@ -179,3 +239,5 @@ const PhoneLogin = () => {
 };
 
 export default PhoneLogin;
+
+

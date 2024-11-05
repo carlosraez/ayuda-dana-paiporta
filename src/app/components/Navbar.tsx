@@ -3,8 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { Clock, HomeIcon, Search, Package2, ArrowLeftRight, LogOut, User } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';  // Añadida esta importación
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -107,6 +107,4 @@ const Navbar = () => {
 
 export default Navbar;
 
-function useAuth(): { user: any; signOut: any; } {
-  throw new Error('Function not implemented.');
-}
+

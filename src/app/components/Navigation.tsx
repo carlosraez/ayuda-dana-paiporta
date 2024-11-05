@@ -1,14 +1,14 @@
-import Navbar from "./Navbar";
+'use client';
 
-export default function RootLayout({ children }) {
+import { AuthProvider } from '@/contexts/AuthContext';
+import Navbar from './Navbar';
+
+
+export default function ClientLayout({ children }) {
   return (
-    <html lang="es">
-      <body>
-        <Navbar />
-        <main>
-          {children}
-        </main>
-      </body>
-    </html>
-  )
+    <AuthProvider>
+      <Navbar />
+      {children}
+    </AuthProvider>
+  );
 }
