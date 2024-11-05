@@ -2,12 +2,68 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Clock, HomeIcon, Search, Package2, ArrowLeftRight, LogOut, User } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Clock, HomeIcon, Search, Package2, ArrowLeftRight, LogOut, User, AlertCircle, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';  // Añadida esta importación
+import { useAuth } from '@/contexts/AuthContext';
+
+// Definición de tipos para los enlaces
+type NavLink = {
+  href: string;
+  label: string;
+  icon?: React.ReactNode;
+  color?: string;
+  requiresAuth: boolean;
+};
+
+const navLinks: NavLink[] = [
+  {
+    href: '/',
+    label: 'Inicio',
+    icon: <HomeIcon className="w-4 h-4" />,
+    color: 'text-gray-600 hover:text-gray-900',
+    requiresAuth: false,
+  },
+  {
+    href: '/ayuda/necesito',
+    label: 'Necesito Ayuda',
+    icon: <AlertCircle className="w-4 h-4" />,
+    color: 'text-red-600 hover:text-red-700',
+    requiresAuth: true,
+  },
+  {
+    href: '/ayuda/ofrezco',
+    label: 'Ofrezco Ayuda',
+    icon: <Heart className="w-4 h-4" />,
+    color: 'text-green-600 hover:text-green-700',
+    requiresAuth: true,
+  },
+  {
+    href: '/intercambio',
+    label: 'Intercambio',
+    icon: <ArrowLeftRight className="w-4 h-4" />,
+    color: 'text-purple-600 hover:text-purple-700',
+    requiresAuth: true,
+  },
+  {
+    href: '/recursos',
+    label: 'Recursos',
+    icon: <Package2 className="w-4 h-4" />,
+    color: 'text-orange-600 hover:text-orange-700',
+    requiresAuth: true,
+  },
+  {
+    href: '/listado',
+    label: 'Ver Listado',
+    icon: <Search className="w-4 h-4" />,
+    color: 'text-blue-600 hover:text-blue-700',
+    requiresAuth: true,
+  },
+];
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     try {
@@ -15,6 +71,11 @@ const Navbar = () => {
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
+  };
+
+  // Función para determinar si un enlace debe mostrarse
+  const shouldShowLink = (link: NavLink) => {
+    return !link.requiresAuth || (link.requiresAuth && user);
   };
 
   return (
@@ -27,55 +88,29 @@ const Navbar = () => {
           </Link>
           
           <div className="flex items-center space-x-6">
-            <Link
-              href="/"
-              className="flex items-center space-x-1 text-gray-600 hover:text-gray-900"
-            >
-              <HomeIcon className="w-4 h-4" />
-              <span>Inicio</span>
-            </Link>
-            
-            <Link
-              href="/ayuda/necesito"
-              className="flex items-center space-x-1 text-red-600 hover:text-red-700"
-            >
-              <span>Necesito Ayuda</span>
-            </Link>
-            
-            <Link
-              href="/ayuda/ofrezco"
-              className="flex items-center space-x-1 text-green-600 hover:text-green-700"
-            >
-              <span>Ofrezco Ayuda</span>
-            </Link>
-
-            <Link
-              href="/intercambio"
-              className="flex items-center space-x-1 text-purple-600 hover:text-purple-700"
-            >
-              <ArrowLeftRight className="w-4 h-4" />
-              <span>Intercambio</span>
-            </Link>
-            
-            <Link
-              href="/recursos"
-              className="flex items-center space-x-1 text-orange-600 hover:text-orange-700"
-            >
-              <Package2 className="w-4 h-4" />
-              <span>Recursos</span>
-            </Link>
-            
-            <Link
-              href="/listado"
-              className="flex items-center space-x-1 text-blue-600 hover:text-blue-700"
-            >
-              <Search className="w-4 h-4" />
-              <span>Ver Listado</span>
-            </Link>
+            {navLinks.map((link) => 
+              shouldShowLink(link) && (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center space-x-1 ${link.color} ${
+                    pathname === link.href ? 'font-semibold' : ''
+                  }`}
+                >
+                  {link.icon}
+                  <span>{link.label}</span>
+                </Link>
+              )
+            )}
 
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link href="/perfil" className="flex items-center space-x-1">
+                <Link 
+                  href="/perfil" 
+                  className={`flex items-center space-x-1 ${
+                    pathname === '/perfil' ? 'font-semibold' : ''
+                  }`}
+                >
                   <User className="w-4 h-4" />
                   <span>{user.phoneNumber}</span>
                 </Link>
