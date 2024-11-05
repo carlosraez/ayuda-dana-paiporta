@@ -30,7 +30,7 @@ const initialOffers = [
 
 const TownResourcesExchange = () => {
   const [needs, setNeeds] = useState(initialNeeds);
-  const [offers, setOffers] = useState(initialOffers);
+  const [offers ] = useState(initialOffers);
 
   // Formulario simple para crear nuevas necesidades
   const AddNeedForm = () => {

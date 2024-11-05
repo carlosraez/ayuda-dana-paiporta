@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { HeartHandshake, Home, Brush, Wrench, Users } from 'lucide-react';
+import { HeartHandshake } from 'lucide-react';
 
 export default function OfrezcoAyuda() {
   const [ofertas, setOfertas] = useState([]);

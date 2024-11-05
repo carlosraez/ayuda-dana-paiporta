@@ -7,9 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
-  Package2, Search, AlertTriangle, CheckCircle2, 
-  MapPin, Phone, Clock, Edit, Trash2, Plus, Save,
-  AlertCircle, MoveDown, MoveUp
+  Search,
+  MapPin, Phone, Clock, Edit, Trash2, Plus, 
 } from 'lucide-react';
 
 const EmergencyResourcesDashboard = () => {
@@ -179,11 +178,11 @@ const EmergencyResourcesDashboard = () => {
     );
   };
 
-  const addResource = (newResource) => {
+  const addResource = (newResource: { id: number; name: string; total: number; available: number; inUse: number; locations: { id: number; name: string; quantity: number; }[]; contact: string; status: string; }) => {
     setResources([...resources, { ...newResource, id: Date.now() }]);
   };
 
-  const updateResource = (updatedResource) => {
+  const updateResource = (updatedResource: { locations?: { id: number; name: string; quantity: number; }[]; inUse?: number; available?: number; id: any; name?: any; total?: any; contact?: any; status?: any; }) => {
     setResources(resources.map(r => 
       r.id === updatedResource.id ? updatedResource : r
     ));
@@ -195,9 +194,9 @@ const EmergencyResourcesDashboard = () => {
     }
   };
 
-  const removeLocation = (resourceId, locationId) => {
+  const removeLocation = (resourceId: number, locationId: number) => {
     const resource = resources.find(r => r.id === resourceId);
-    const location = resource.locations.find(l => l.id === locationId);
+    const location = resource?.locations.find(l => l.id === locationId);
     
     const updatedResource = {
       ...resource,
