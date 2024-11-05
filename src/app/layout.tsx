@@ -1,30 +1,22 @@
-// app/layout.tsx
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import Navigation from './components/Navigation'
+// app/layout.js
+'use client';
 
 
-const inter = Inter({ subsets: ['latin'] })
+import { Inter } from 'next/font/google';
+import './globals.css';
+import Navbar from './components/Navbar';
 
-export const metadata: Metadata = {
-  title: 'DANA Paiporta - Ayuda Vecinal',
-  description: 'Portal de ayuda vecinal para afectados por la DANA en Paiporta',
-}
+const inter = Inter({ subsets: ['latin'] });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <body className={inter.className}>
-        <Navigation />
-        <main className="min-h-screen bg-gray-50 pt-4">
+        <AuthContextProvider>
+          <Navbar />
           {children}
-        </main>
+        </AuthContextProvider>
       </body>
     </html>
-  )
+  );
 }
