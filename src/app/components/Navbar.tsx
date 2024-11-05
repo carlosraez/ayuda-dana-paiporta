@@ -3,7 +3,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Clock, HomeIcon, Search, Package2, ArrowLeftRight, LogOut, User, AlertCircle, Heart } from 'lucide-react';
+import { 
+  Clock, HomeIcon, Search, Package2, ArrowLeftRight, 
+  LogOut, User, AlertCircle, Heart, Eye
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -16,7 +19,8 @@ type NavLink = {
   requiresAuth: boolean;
 };
 
-const navLinks: NavLink[] = [
+// Enlaces públicos (siempre visibles)
+const publicLinks: NavLink[] = [
   {
     href: '/',
     label: 'Inicio',
@@ -24,6 +28,17 @@ const navLinks: NavLink[] = [
     color: 'text-gray-600 hover:text-gray-900',
     requiresAuth: false,
   },
+  {
+    href: '/recursos-publicos',
+    label: 'Ver Recursos Disponibles',
+    icon: <Eye className="w-4 h-4" />,
+    color: 'text-purple-600 hover:text-purple-700',
+    requiresAuth: false,
+  },
+];
+
+// Enlaces protegidos (requieren autenticación)
+const protectedLinks: NavLink[] = [
   {
     href: '/ayuda/necesito',
     label: 'Necesito Ayuda',
@@ -40,7 +55,7 @@ const navLinks: NavLink[] = [
   },
   {
     href: '/intercambio',
-    label: 'Intercambio',
+    label: 'Gestionar Intercambios',
     icon: <ArrowLeftRight className="w-4 h-4" />,
     color: 'text-purple-600 hover:text-purple-700',
     requiresAuth: true,
@@ -73,11 +88,6 @@ const Navbar = () => {
     }
   };
 
-  // Función para determinar si un enlace debe mostrarse
-  const shouldShowLink = (link: NavLink) => {
-    return !link.requiresAuth || (link.requiresAuth && user);
-  };
-
   return (
     <nav className="border-b">
       <div className="max-w-screen-xl mx-auto px-4">
@@ -88,23 +98,37 @@ const Navbar = () => {
           </Link>
           
           <div className="flex items-center space-x-6">
-            {navLinks.map((link) => 
-              shouldShowLink(link) && (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex items-center space-x-1 ${link.color} ${
-                    pathname === link.href ? 'font-semibold' : ''
-                  }`}
-                >
-                  {link.icon}
-                  <span>{link.label}</span>
-                </Link>
-              )
-            )}
+            {/* Enlaces públicos siempre visibles */}
+            {publicLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center space-x-1 ${link.color} ${
+                  pathname === link.href ? 'font-semibold' : ''
+                }`}
+              >
+                {link.icon}
+                <span>{link.label}</span>
+              </Link>
+            ))}
 
+            {/* Enlaces protegidos solo visibles con autenticación */}
+            {user && protectedLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center space-x-1 ${link.color} ${
+                  pathname === link.href ? 'font-semibold' : ''
+                }`}
+              >
+                {link.icon}
+                <span>{link.label}</span>
+              </Link>
+            ))}
+
+            {/* Sección de usuario */}
             {user ? (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4 border-l pl-4">
                 <Link 
                   href="/perfil" 
                   className={`flex items-center space-x-1 ${
@@ -127,7 +151,7 @@ const Navbar = () => {
             ) : (
               <Link
                 href="/login"
-                className="flex items-center space-x-1 text-gray-600 hover:text-gray-900"
+                className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 border-l pl-4"
               >
                 <User className="w-4 h-4" />
                 <span>Acceder</span>
