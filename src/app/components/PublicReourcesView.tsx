@@ -4,79 +4,82 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Package, Phone, Clock, Share, HandHeart } from 'lucide-react';
+import { ResourceData } from '../recursos-publicos/page';
 
-// Vista pública de solo lectura
-const PublicResourcesView = ({ needs, offers }) => {
-  const ResourceCard = ({ data, type }) => {
-    const getPriorityColor = (priority) => {
-      switch (priority) {
-        case 'baja': return 'bg-green-100 text-green-800';
-        case 'media': return 'bg-blue-100 text-blue-800';
-        case 'alta': return 'bg-yellow-100 text-yellow-800';
-        case 'urgente': return 'bg-red-100 text-red-800';
-        default: return 'bg-gray-100 text-gray-800';
-      }
-    };
+interface PublicResourcesViewProps {
+  needs: ResourceData[];
+  offers: ResourceData[];
+}
 
-    const getAvailabilityColor = (available) => {
-      switch (available) {
-        case 'inmediata': return 'bg-green-100 text-green-800';
-        case '24h': return 'bg-blue-100 text-blue-800';
-        case '48h': return 'bg-yellow-100 text-yellow-800';
-        default: return 'bg-gray-100 text-gray-800';
-      }
-    };
-
-    return (
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-lg font-semibold">{data.item}</CardTitle>
-              {type === 'need' && (
-                <Badge className={getPriorityColor(data.priority)}>
-                  {data.priority.toUpperCase()}
-                </Badge>
-              )}
-              {type === 'offer' && (
-                <Badge className={getAvailabilityColor(data.available)}>
-                  Disponible: {data.available}
-                </Badge>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-gray-600">{data.details}</p>
-          
-          <div className="flex items-center gap-2 text-sm">
-            <Package className="w-4 h-4 text-gray-400" />
-            <span className="font-medium">Cantidad:</span>
-            <span>{data.quantity}</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm">
-            <Phone className="w-4 h-4 text-gray-400" />
-            <span className="font-medium">Contacto:</span>
-            <span>{data.contact}</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Clock className="w-4 h-4" />
-            <span>
-              {new Date(data.timePosted).toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-    );
+const PublicResourcesView: React.FC<PublicResourcesViewProps> = ({ needs, offers }) => {
+  const getPriorityColor = (priority?: string) => {
+    switch (priority) {
+      case 'baja': return 'bg-green-100 text-green-800';
+      case 'media': return 'bg-blue-100 text-blue-800';
+      case 'alta': return 'bg-yellow-100 text-yellow-800';
+      case 'urgente': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
+
+  const getAvailabilityColor = (available?: string) => {
+    switch (available) {
+      case 'inmediata': return 'bg-green-100 text-green-800';
+      case '24h': return 'bg-blue-100 text-blue-800';
+      case '48h': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const ResourceCard: React.FC<{ data: ResourceData; type: 'need' | 'offer' }> = ({ data, type }) => (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-lg font-semibold">{data.item}</CardTitle>
+            {type === 'need' && data.priority && (
+              <Badge className={getPriorityColor(data.priority)}>
+                {data.priority.toUpperCase()}
+              </Badge>
+            )}
+            {type === 'offer' && data.available && (
+              <Badge className={getAvailabilityColor(data.available)}>
+                Disponible: {data.available}
+              </Badge>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-gray-600">{data.details}</p>
+        
+        <div className="flex items-center gap-2 text-sm">
+          <Package className="w-4 h-4 text-gray-400" />
+          <span className="font-medium">Cantidad:</span>
+          <span>{data.quantity}</span>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm">
+          <Phone className="w-4 h-4 text-gray-400" />
+          <span className="font-medium">Contacto:</span>
+          <span>{data.contact}</span>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Clock className="w-4 h-4" />
+          <span>
+            {new Date(data.timePosted).toLocaleDateString('es-ES', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-8">

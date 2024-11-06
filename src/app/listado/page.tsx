@@ -6,9 +6,37 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HandHeart, HeartHandshake, Search, MapPin, Phone } from 'lucide-react';
 
+// Define tipos de datos
+type TipoUrgencia = 'alta' | 'media' | 'baja';
+type TipoEstado = 'pendiente' | 'disponible' | 'completado';
+type TipoAyuda = 'bombeo' | 'limpieza' | 'alojamiento' | 'equipos' | 'voluntariado' | 'otros';
+
+interface SolicitudAyuda {
+  id: number;
+  tipo: TipoAyuda;
+  descripcion: string;
+  direccion: string;
+  contacto: string;
+  estado: TipoEstado;
+  fecha: string;
+  urgencia: TipoUrgencia;
+}
+
+interface OfertaAyuda {
+  id: number;
+  tipo: TipoAyuda;
+  descripcion: string;
+  disponibilidad: string;
+  contacto: string;
+  estado: TipoEstado;
+  fecha: string;
+}
+
+type ItemAyuda = SolicitudAyuda | OfertaAyuda;
+
 export default function ListadoPage() {
   // Datos de ejemplo
-  const [solicitudes] = useState([
+  const [solicitudes] = useState<SolicitudAyuda[]>([
     {
       id: 1,
       tipo: 'bombeo',
@@ -31,7 +59,7 @@ export default function ListadoPage() {
     }
   ]);
 
-  const [ofertas] = useState([
+  const [ofertas] = useState<OfertaAyuda[]>([
     {
       id: 1,
       tipo: 'voluntariado',
@@ -52,14 +80,14 @@ export default function ListadoPage() {
     }
   ]);
 
-  const [filtro, setFiltro] = useState('');
-  const [tipoFiltro, setTipoFiltro] = useState('todos');
+  const [filtro, setFiltro] = useState<string>('');
+  const [tipoFiltro, setTipoFiltro] = useState<TipoAyuda | 'todos'>('todos');
 
-  const filtrarItems = (items) => {
+  const filtrarItems = (items: ItemAyuda[]): ItemAyuda[] => {
     return items.filter(item => 
       (tipoFiltro === 'todos' || item.tipo === tipoFiltro) &&
       (item.descripcion.toLowerCase().includes(filtro.toLowerCase()) ||
-       item.direccion?.toLowerCase().includes(filtro.toLowerCase()) ||
+       ('direccion' in item ? item.direccion.toLowerCase().includes(filtro.toLowerCase()) : false) ||
        item.tipo.toLowerCase().includes(filtro.toLowerCase()))
     );
   };
@@ -85,7 +113,7 @@ export default function ListadoPage() {
         <select
           className="border rounded-md px-3 py-2"
           value={tipoFiltro}
-          onChange={(e) => setTipoFiltro(e.target.value)}
+          onChange={(e) => setTipoFiltro(e.target.value as TipoAyuda | 'todos')}
         >
           <option value="todos">Todos los tipos</option>
           <option value="bombeo">Bombeo</option>
@@ -119,7 +147,7 @@ export default function ListadoPage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className={`px-3 py-1 rounded-full text-sm ${
-                          solicitud.urgencia === 'alta' 
+                          'urgencia' in solicitud && solicitud.urgencia === 'alta' 
                             ? 'bg-red-100 text-red-800' 
                             : 'bg-yellow-100 text-yellow-800'
                         }`}>
@@ -131,10 +159,12 @@ export default function ListadoPage() {
                       </div>
                       <p className="text-gray-800">{solicitud.descripcion}</p>
                       <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <MapPin size={16} />
-                          {solicitud.direccion}
-                        </span>
+                        {'direccion' in solicitud && (
+                          <span className="flex items-center gap-1">
+                            <MapPin size={16} />
+                            {solicitud.direccion}
+                          </span>
+                        )}
                         <a 
                           href={`tel:${solicitud.contacto}`}
                           className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
@@ -173,10 +203,12 @@ export default function ListadoPage() {
                       </div>
                       <p className="text-gray-800">{oferta.descripcion}</p>
                       <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <span className="font-medium">Disponibilidad:</span>
-                          {oferta.disponibilidad}
-                        </span>
+                        {'disponibilidad' in oferta && (
+                          <span className="flex items-center gap-1">
+                            <span className="font-medium">Disponibilidad:</span>
+                            {oferta.disponibilidad}
+                          </span>
+                        )}
                         <a 
                           href={`tel:${oferta.contacto}`}
                           className="flex items-center gap-1 text-blue-600 hover:text-blue-800"

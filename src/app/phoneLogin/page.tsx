@@ -19,20 +19,34 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
+  ApplicationVerifier,
+  User as FirebaseUser
 } from 'firebase/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import { auth } from '@/firebase';
 
-// Tipos para TypeScript
+// Types
+interface UserProfile {
+  displayName: string;
+  createdAt: string;
+}
+
+interface AuthContextType {
+  user: FirebaseUser | null;
+  updateUserProfile: (profile: UserProfile) => Promise<void>;
+}
+
+type StepType = 'disclaimer' | 'phone' | 'verify' | 'profile';
+
 declare global {
   interface Window {
-    recaptchaVerifier: RecaptchaVerifier | null;
+    recaptchaVerifier: ApplicationVerifier | null;
   }
 }
 
 const PhoneLogin = () => {
   // Estados
-  const [step, setStep] = useState('disclaimer');
+  const [step, setStep] = useState<StepType>('disclaimer');
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
@@ -43,7 +57,7 @@ const PhoneLogin = () => {
 
   // Hooks
   const router = useRouter();
-  const { user, updateUserProfile } = useAuth();
+  const { user, updateUserProfile } = useAuth() as AuthContextType;
 
   // Redirigir si el usuario ya está autenticado
   useEffect(() => {
@@ -54,43 +68,33 @@ const PhoneLogin = () => {
 
   // Inicializar reCAPTCHA
   useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      !window.recaptchaVerifier &&
-      step === 'phone'
-    ) {
+    if (typeof window !== 'undefined' && !window.recaptchaVerifier && step === 'phone') {
       try {
-        window.recaptchaVerifier = new RecaptchaVerifier(
-          'recaptcha-container',
-          {
-            size: 'normal',
-            callback: () => {
-              console.log('reCAPTCHA resuelto');
-            },
-            'expired-callback': () => {
-              setError(
-                'El captcha ha expirado. Por favor, inténtalo de nuevo.'
-              );
-              if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = null;
-              }
-            },
+        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'normal',
+          callback: () => {
+            console.log('reCAPTCHA resuelto');
           },
-          auth
-        );
-        window.recaptchaVerifier.render();
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.error('Error al inicializar reCAPTCHA:', error.message);
-        } else {
-          console.error('Error al inicializar reCAPTCHA:', error);
-        }
-        setError(
-          'Error al inicializar el sistema de verificación. Por favor, recarga la página.'
-        );
+          'expired-callback': () => {
+            setError('El captcha ha expirado. Por favor, inténtalo de nuevo.');
+            if (window.recaptchaVerifier) {
+              window.recaptchaVerifier = null;
+            }
+          },
+        });
+        window.recaptchaVerifier = verifier;
+        verifier.render();
+      } catch (error) {
+        console.error('Error al inicializar reCAPTCHA:', error);
+        setError('Error al inicializar el sistema de verificación. Por favor, recarga la página.');
       }
     }
+    
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier = null;
+      }
+    };
   }, [step]);
 
   // Handlers
@@ -110,9 +114,7 @@ const PhoneLogin = () => {
 
     const phoneRegex = /^[6-9]\d{8}$/;
     if (!phoneRegex.test(phone)) {
-      setError(
-        'Por favor, introduce un número de teléfono válido (debe empezar por 6, 7, 8 o 9)'
-      );
+      setError('Por favor, introduce un número de teléfono válido (debe empezar por 6, 7, 8 o 9)');
       setIsLoading(false);
       return;
     }
@@ -123,29 +125,19 @@ const PhoneLogin = () => {
       }
 
       const formattedPhone = '+34' + phone;
-      console.log('Enviando SMS a:', formattedPhone);
-
       const confirmation = await signInWithPhoneNumber(
         auth,
         formattedPhone,
         window.recaptchaVerifier
       );
 
-      console.log('SMS enviado correctamente');
       setConfirmationResult(confirmation);
       setStep('verify');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error('Error al enviar SMS:', err.message);
-      } else {
-        console.error('Error al enviar SMS:', err);
-      }
-      setError(
-        'Error al enviar el código. Por favor, verifica el número e inténtalo de nuevo.'
-      );
+    } catch (error) {
+      console.error('Error al enviar SMS:', error);
+      setError('Error al enviar el código. Por favor, verifica el número e inténtalo de nuevo.');
 
       if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
         window.recaptchaVerifier = null;
       }
     } finally {
@@ -171,12 +163,8 @@ const PhoneLogin = () => {
 
       await confirmationResult.confirm(code);
       setStep('profile');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error('Error al verificar código:', err.message);
-      } else {
-        console.error('Error al verificar código:', err);
-      }
+    } catch (error) {
+      console.error('Error al verificar código:', error);
       setError('Código incorrecto. Por favor, inténtalo de nuevo.');
     } finally {
       setIsLoading(false);
@@ -197,16 +185,12 @@ const PhoneLogin = () => {
     try {
       await updateUserProfile({
         displayName: name,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
       });
 
       router.push('/');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error('Error al guardar perfil:', err.message);
-      } else {
-        console.error('Error al guardar perfil:', err);
-      }
+    } catch (error) {
+      console.error('Error al guardar perfil:', error);
       setError('Error al guardar el perfil. Inténtalo de nuevo.');
     } finally {
       setIsLoading(false);
@@ -214,7 +198,7 @@ const PhoneLogin = () => {
   };
 
   // Componente de Disclaimer
-  const DisclaimerContent = () => (
+  const DisclaimerContent: React.FC = () => (
     <div className="text-xs text-gray-500 mt-4 space-y-2">
       <p className="font-semibold text-red-600">AVISO IMPORTANTE:</p>
       <p>
@@ -363,7 +347,6 @@ const PhoneLogin = () => {
                 onClick={() => {
                   setStep('phone');
                   if (window.recaptchaVerifier) {
-                    window.recaptchaVerifier.clear();
                     window.recaptchaVerifier = null;
                   }
                 }}

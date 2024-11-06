@@ -1,12 +1,24 @@
-// components/ProtectedRoute.js
 'use client';
 
+import { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
+interface ProtectedRouteProps {
+  children: ReactNode;
+}
 
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+interface AuthContextType {
+  user: {
+    phoneNumber: string;
+    // Add other user properties as needed
+  } | null;
+  loading: boolean;
+}
+
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const { user, loading } = useAuth() as AuthContextType;
   const router = useRouter();
 
   useEffect(() => {
@@ -27,7 +39,7 @@ const ProtectedRoute = ({ children }) => {
     return null;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

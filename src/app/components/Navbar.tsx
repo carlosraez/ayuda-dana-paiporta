@@ -9,8 +9,21 @@ import {
   LogOut, User, AlertCircle, Heart, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
-// Definición de tipos para los enlaces
+// Define the User type
+interface User {
+  phoneNumber: string;
+  // Add other user properties as needed
+}
+
+// Define the AuthContextType
+interface AuthContextType {
+  user: User | null;
+  // Add other auth context properties as needed
+}
+
+// Update the type for links
 type NavLink = {
   href: string;
   label: string;
@@ -77,15 +90,11 @@ const protectedLinks: NavLink[] = [
 ];
 
 const Navbar = () => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth() as AuthContextType;
   const pathname = usePathname();
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
+    console.log('cerrar sesion');
   };
 
   return (
@@ -165,10 +174,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
-
-function useAuth(): { user: any; signOut: any; } {
-  throw new Error('Function not implemented.');
-}
 

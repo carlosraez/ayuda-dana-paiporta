@@ -41,7 +41,7 @@ const TownResourcesExchange = () => {
       priority: 'media'
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: { preventDefault: () => void; }) => {
       e.preventDefault();
       const newNeed = {
         id: Date.now(),

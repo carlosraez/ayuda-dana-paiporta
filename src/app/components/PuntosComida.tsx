@@ -3,8 +3,27 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock, MapPin, Users, Coffee, UtensilsCrossed } from 'lucide-react';
 
+// Define interfaces for the data structures
+interface Horarios {
+  desayuno: string;
+  comida: string;
+  cena: string;
+}
+
+interface PuntoComida {
+  id: number;
+  nombre: string;
+  direccion: string;
+  horarios: Horarios;
+  aforo: number;
+  notas: string;
+  servicios: string[];
+}
+
+type TipoComida = 'desayuno' | 'comida' | 'cena' | 'cerrado';
+
 const PuntosComidaApp = () => {
-  const [puntosComida] = useState([
+  const [puntosComida] = useState<PuntoComida[]>([
     {
       id: 1,
       nombre: "Polideportivo Municipal",
@@ -33,7 +52,7 @@ const PuntosComidaApp = () => {
     }
   ]);
 
-  const [horarioActual, setHorarioActual] = useState(() => {
+  const [horarioActual, setHorarioActual] = useState<TipoComida>(() => {
     const hora = new Date().getHours();
     if (hora >= 7 && hora < 11) return 'desayuno';
     if (hora >= 12 && hora < 16) return 'comida';
@@ -43,7 +62,7 @@ const PuntosComidaApp = () => {
 
   const [mostrarTodos, setMostrarTodos] = useState(false);
 
-  const obtenerEstadoServicio = (punto, tipoComida) => {
+  const obtenerEstadoServicio = (punto: PuntoComida, tipoComida: keyof Horarios): 'abierto' | 'cerrado' => {
     const hora = new Date().getHours();
     const [inicioHora] = punto.horarios[tipoComida].split(' - ')[0].split(':');
     const [finHora] = punto.horarios[tipoComida].split(' - ')[1].split(':');
@@ -111,7 +130,7 @@ const PuntosComidaApp = () => {
               <CardTitle className="flex justify-between items-start">
                 <div>
                   {punto.nombre}
-                  {obtenerEstadoServicio(punto, horarioActual) === 'abierto' && (
+                  {horarioActual !== 'cerrado' && obtenerEstadoServicio(punto, horarioActual) === 'abierto' && (
                     <span className="ml-2 text-sm bg-green-500 text-white px-2 py-1 rounded">
                       Abierto ahora
                     </span>
@@ -133,13 +152,15 @@ const PuntosComidaApp = () => {
                   <p className="font-bold flex items-center mb-2">
                     <Clock className="mr-2" size={20} /> Horarios:
                   </p>
-                  {(mostrarTodos ? ['desayuno', 'comida', 'cena'] : [horarioActual]).map(comida => (
-                    <div 
-                      key={comida}
-                      className={`mb-1 ${obtenerEstadoServicio(punto, comida) === 'abierto' ? 'text-green-600 font-bold' : ''}`}
-                    >
-                      <span className="capitalize">{comida}</span>: {punto.horarios[comida]}
-                    </div>
+                  {(mostrarTodos ? ['desayuno', 'comida', 'cena'] as const : [horarioActual]).map(comida => (
+                    comida !== 'cerrado' && (
+                      <div 
+                        key={comida}
+                        className={`mb-1 ${obtenerEstadoServicio(punto, comida) === 'abierto' ? 'text-green-600 font-bold' : ''}`}
+                      >
+                        <span className="capitalize">{comida}</span>: {punto.horarios[comida]}
+                      </div>
+                    )
                   ))}
                 </div>
 
