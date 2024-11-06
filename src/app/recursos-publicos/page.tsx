@@ -4,24 +4,8 @@ import { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, DocumentData, QuerySnapshot } from 'firebase/firestore';
 import PublicResourcesView from '../components/PublicReourcesView';
 import { db } from '@/firebase';
+import { NeedData, OfferData } from '../types/resourcers';
 
-// Define interfaces for your data types
-export interface ResourceData {
-  id: string;
-  item: string;
-  details: string;
-  quantity: string;
-  contact: string;
-  timePosted: string;
-}
-
-interface NeedData extends ResourceData {
-  priority: 'baja' | 'media' | 'alta' | 'urgente';
-}
-
-interface OfferData extends ResourceData {
-  available: 'inmediata' | '24h' | '48h';
-}
 
 export default function RecursosPublicosPage() {
   const [needs, setNeeds] = useState<NeedData[]>([]);
@@ -35,7 +19,8 @@ export default function RecursosPublicosPage() {
       setNeeds(
         snapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          quantity: Number(doc.data().quantity) || 0
         } as NeedData))
       );
     });
@@ -44,7 +29,8 @@ export default function RecursosPublicosPage() {
       setOffers(
         snapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          quantity: Number(doc.data().quantity) || 0
         } as OfferData))
       );
     });

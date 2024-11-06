@@ -4,15 +4,35 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Package, Phone, Clock, Share, HandHeart } from 'lucide-react';
-import { ResourceData } from '../recursos-publicos/page';
+
+// Define resource types
+type Priority = 'baja' | 'media' | 'alta' | 'urgente';
+type Availability = 'inmediata' | '24h' | '48h';
+
+interface BaseResourceData {
+  id: string;
+  item: string;
+  details: string;
+  quantity: number;
+  contact: string;
+  timePosted: string;
+}
+
+interface NeedData extends BaseResourceData {
+  priority: Priority;
+}
+
+interface OfferData extends BaseResourceData {
+  available: Availability;
+}
 
 interface PublicResourcesViewProps {
-  needs: ResourceData[];
-  offers: ResourceData[];
+  needs: NeedData[];
+  offers: OfferData[];
 }
 
 const PublicResourcesView: React.FC<PublicResourcesViewProps> = ({ needs, offers }) => {
-  const getPriorityColor = (priority?: string) => {
+  const getPriorityColor = (priority: Priority) => {
     switch (priority) {
       case 'baja': return 'bg-green-100 text-green-800';
       case 'media': return 'bg-blue-100 text-blue-800';
@@ -22,7 +42,7 @@ const PublicResourcesView: React.FC<PublicResourcesViewProps> = ({ needs, offers
     }
   };
 
-  const getAvailabilityColor = (available?: string) => {
+  const getAvailabilityColor = (available: Availability) => {
     switch (available) {
       case 'inmediata': return 'bg-green-100 text-green-800';
       case '24h': return 'bg-blue-100 text-blue-800';
@@ -31,18 +51,23 @@ const PublicResourcesView: React.FC<PublicResourcesViewProps> = ({ needs, offers
     }
   };
 
-  const ResourceCard: React.FC<{ data: ResourceData; type: 'need' | 'offer' }> = ({ data, type }) => (
+  type ResourceCardProps = {
+    data: NeedData | OfferData;
+    type: 'need' | 'offer';
+  };
+
+  const ResourceCard: React.FC<ResourceCardProps> = ({ data, type }) => (
     <Card>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-lg font-semibold">{data.item}</CardTitle>
-            {type === 'need' && data.priority && (
+            {type === 'need' && 'priority' in data && (
               <Badge className={getPriorityColor(data.priority)}>
                 {data.priority.toUpperCase()}
               </Badge>
             )}
-            {type === 'offer' && data.available && (
+            {type === 'offer' && 'available' in data && (
               <Badge className={getAvailabilityColor(data.available)}>
                 Disponible: {data.available}
               </Badge>
