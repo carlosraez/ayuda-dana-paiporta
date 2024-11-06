@@ -1,32 +1,28 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Clock, HomeIcon, Search, Package2, ArrowLeftRight, 
-  LogOut, User, AlertCircle, Heart, Eye
+  LogOut, User, AlertCircle, Heart, Eye, Menu, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from '@/contexts/AuthContext';
 
-// Define the User type
-interface User {
-  phoneNumber: string;
-  // Add other user properties as needed
-}
-
-// Define the AuthContextType
+// Interfaces
 interface AuthContextType {
-  user: User | null;
-  // Add other auth context properties as needed
+  user: {
+    phoneNumber: string;
+  } | null;
 }
 
-// Update the type for links
+// Definición de tipos para los enlaces
 type NavLink = {
   href: string;
   label: string;
-  icon?: React.ReactNode;
+  icon: React.ReactNode;
   color?: string;
   requiresAuth: boolean;
 };
@@ -91,48 +87,59 @@ const protectedLinks: NavLink[] = [
 const Navbar = () => {
   const { user } = useAuth() as AuthContextType;
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSignOut = async () => {
     console.log('cerrar sesion');
   };
 
+  const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
+    <>
+      {/* Enlaces públicos */}
+      {publicLinks.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className={`flex items-center space-x-1 ${link.color} ${
+            pathname === link.href ? 'font-semibold' : ''
+          } ${mobile ? 'py-2' : ''}`}
+          onClick={() => mobile && setIsOpen(false)}
+        >
+          {link.icon}
+          <span>{link.label}</span>
+        </Link>
+      ))}
+
+      {/* Enlaces protegidos */}
+      {user && protectedLinks.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className={`flex items-center space-x-1 ${link.color} ${
+            pathname === link.href ? 'font-semibold' : ''
+          } ${mobile ? 'py-2' : ''}`}
+          onClick={() => mobile && setIsOpen(false)}
+        >
+          {link.icon}
+          <span>{link.label}</span>
+        </Link>
+      ))}
+    </>
+  );
+
   return (
     <nav className="border-b">
       <div className="max-w-screen-xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <Clock className="w-6 h-6 text-red-600" />
             <span className="font-semibold text-xl">DANA Paiporta</span>
           </Link>
           
-          <div className="flex items-center space-x-6">
-            {/* Enlaces públicos siempre visibles */}
-            {publicLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex items-center space-x-1 ${link.color} ${
-                  pathname === link.href ? 'font-semibold' : ''
-                }`}
-              >
-                {link.icon}
-                <span>{link.label}</span>
-              </Link>
-            ))}
-
-            {/* Enlaces protegidos solo visibles con autenticación */}
-            {user && protectedLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex items-center space-x-1 ${link.color} ${
-                  pathname === link.href ? 'font-semibold' : ''
-                }`}
-              >
-                {link.icon}
-                <span>{link.label}</span>
-              </Link>
-            ))}
+          {/* Enlaces para desktop */}
+          <div className="hidden md:flex items-center space-x-6">
+            <NavLinks />
 
             {/* Sección de usuario */}
             {user ? (
@@ -166,6 +173,57 @@ const Navbar = () => {
               </Link>
             )}
           </div>
+
+          {/* Menú móvil */}
+          <div className="md:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <div className="flex flex-col space-y-4 mt-8">
+                  <NavLinks mobile />
+                  
+                  <div className="border-t pt-4">
+                    {user ? (
+                      <>
+                        <Link
+                          href="/perfil"
+                          className="flex items-center space-x-2 py-2"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <User className="w-4 h-4" />
+                          <span>{user.phoneNumber}</span>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          className="flex items-center space-x-2 w-full justify-start p-2"
+                          onClick={() => {
+                            handleSignOut();
+                            setIsOpen(false);
+                          }}
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Salir</span>
+                        </Button>
+                      </>
+                    ) : (
+                      <Link
+                        href="/login"
+                        className="flex items-center space-x-2 py-2"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <User className="w-4 h-4" />
+                        <span>Acceder</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </nav>
@@ -173,4 +231,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
