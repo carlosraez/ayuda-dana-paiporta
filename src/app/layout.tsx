@@ -1,4 +1,6 @@
-import './globals.css';
+'use client'
+
+import './globals.css' 
 import { Inter } from 'next/font/google';
 import ClientLayout from './components/Navigation';
 import { AuthProvider } from '@/contexts/AuthContext';
