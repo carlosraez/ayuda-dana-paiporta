@@ -1,6 +1,9 @@
-import ClientLayout from './components/Navigation';
 import './globals.css';
 import { Inter } from 'next/font/google';
+import ClientLayout from './components/Navigation';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ThemeProvider } from 'next-themes';
+
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -10,9 +13,18 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
-        <ClientLayout>{children}</ClientLayout>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
