@@ -1,4 +1,5 @@
-// app/firebase.js
+'use client';
+
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -15,11 +16,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const firebase_app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+let firebase_app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 // Initialize services
-export const auth = getAuth(firebase_app);
-export const db = getFirestore(firebase_app);
+export const auth = typeof window !== 'undefined' ? getAuth(firebase_app) : null;
+export const db = typeof window !== 'undefined' ? getFirestore(firebase_app) : null;
 
 // Initialize Analytics and export it
 export const analytics = typeof window !== 'undefined' ? 
