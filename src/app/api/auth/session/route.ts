@@ -1,22 +1,6 @@
 // pages/api/auth/session/route.tsx
-import type { NextApiRequest, NextApiResponse } from 'next';
-import * as admin from 'firebase-admin';
-
-// Inicializa Firebase Admin SDK si aún no está inicializado
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // Reemplaza las secuencias de escape de nueva línea
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-    });
-  } catch (error) {
-    console.error('Error al inicializar Firebase Admin SDK:', error);
-  }
-}
+import { NextApiRequest, NextApiResponse } from 'next';
+import admin from '../../../../../firebaseAdmin'; 
 
 export default async function handler(
   req: NextApiRequest,
@@ -33,7 +17,6 @@ export default async function handler(
   }
 
   try {
-    // Especifica la duración de la cookie de sesión
     const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 días
 
     // Verifica el idToken y crea una cookie de sesión
@@ -50,7 +33,12 @@ export default async function handler(
     };
 
     // Establece la cookie de sesión
-    res.setHeader('Set-Cookie', `session=${sessionCookie}; Path=/; HttpOnly; Max-Age=${options.maxAge}; ${options.secure ? 'Secure;' : ''} SameSite=${options.sameSite};`);
+    res.setHeader(
+      'Set-Cookie',
+      `session=${sessionCookie}; Path=/; HttpOnly; Max-Age=${options.maxAge}; ${
+        options.secure ? 'Secure;' : ''
+      } SameSite=${options.sameSite};`
+    );
 
     return res.status(200).json({ message: 'Sesión establecida correctamente' });
   } catch (error) {

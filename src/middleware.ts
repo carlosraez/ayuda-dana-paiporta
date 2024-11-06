@@ -1,40 +1,27 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import admin from '../firebaseAdmin'; // Ajusta la ruta según corresponda
 
-// Rutas que requieren autenticación
-const protectedRoutes = [
-  '/ayuda/necesito',
-  '/ayuda/ofrezco',
-  '/intercambio',
-  '/recursos',
-  '/listado',
-  '/perfil'
-];
+export async function middleware(request: NextRequest) {
+  const sessionCookie = request.cookies.get('session')?.value;
 
-export function middleware(request: NextRequest) {
-  const token = request.cookies.get('auth-token');
-  const { pathname } = request.nextUrl;
-
-  // Si la ruta requiere autenticación y no hay token, redirige al login
-  if (protectedRoutes.includes(pathname) && !token) {
-    const url = new URL('/login', request.url);
-    url.searchParams.set('from', pathname);
-    return NextResponse.redirect(url);
+  if (!sessionCookie) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Si está autenticado e intenta acceder al login, redirige a inicio
-  if (pathname === '/login' && token) {
-    return NextResponse.redirect(new URL('/', request.url));
+  try {
+    // Verifica la cookie de sesión
+    await admin.auth().verifySessionCookie(sessionCookie, true);
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Error al verificar la cookie de sesión:', error);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
-
-  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    '/',
-    '/login',
     '/ayuda/:path*',
     '/intercambio',
     '/recursos',
