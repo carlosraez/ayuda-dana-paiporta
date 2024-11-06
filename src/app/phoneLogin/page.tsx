@@ -20,12 +20,13 @@ import {
   signInWithPhoneNumber,
   ConfirmationResult,
   ApplicationVerifier,
+  Auth,
   User as FirebaseUser
 } from 'firebase/auth';
 import { useAuth } from '@/contexts/AuthContext';
-import { auth } from '@/firebase';
+import { auth as firebaseAuth } from '@/firebase';
 
-// Types
+// Tipos
 interface UserProfile {
   displayName: string;
   createdAt: string;
@@ -54,10 +55,18 @@ const PhoneLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [auth, setAuth] = useState<Auth | null>(null);
 
   // Hooks
   const router = useRouter();
   const { user, updateUserProfile } = useAuth() as AuthContextType;
+
+  // Inicializar auth en el cliente
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setAuth(firebaseAuth);
+    }
+  }, []);
 
   // Redirigir si el usuario ya está autenticado
   useEffect(() => {
@@ -68,7 +77,7 @@ const PhoneLogin = () => {
 
   // Inicializar reCAPTCHA
   useEffect(() => {
-    if (typeof window !== 'undefined' && !window.recaptchaVerifier && step === 'phone') {
+    if (typeof window !== 'undefined' && !window.recaptchaVerifier && step === 'phone' && auth) {
       try {
         const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'normal',
@@ -95,7 +104,7 @@ const PhoneLogin = () => {
         window.recaptchaVerifier = null;
       }
     };
-  }, [step]);
+  }, [step, auth]);
 
   // Handlers
   const handleDisclaimerAccept = (e: React.FormEvent) => {
@@ -109,6 +118,8 @@ const PhoneLogin = () => {
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!auth) return;
+    
     setError('');
     setIsLoading(true);
 
@@ -243,6 +254,14 @@ const PhoneLogin = () => {
       </p>
     </div>
   );
+
+  if (!auth && step !== 'disclaimer') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div>Cargando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
