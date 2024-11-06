@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Package, Phone, Clock, Share, HandHeart } from 'lucide-react';
 
-// Define resource types
+// Tipos compartidos
 type Priority = 'baja' | 'media' | 'alta' | 'urgente';
 type Availability = 'inmediata' | '24h' | '48h';
 
@@ -32,7 +32,7 @@ interface PublicResourcesViewProps {
 }
 
 const PublicResourcesView: React.FC<PublicResourcesViewProps> = ({ needs, offers }) => {
-  const getPriorityColor = (priority: Priority) => {
+  const getPriorityColor = (priority: Priority): string => {
     switch (priority) {
       case 'baja': return 'bg-green-100 text-green-800';
       case 'media': return 'bg-blue-100 text-blue-800';
@@ -42,7 +42,7 @@ const PublicResourcesView: React.FC<PublicResourcesViewProps> = ({ needs, offers
     }
   };
 
-  const getAvailabilityColor = (available: Availability) => {
+  const getAvailabilityColor = (available: Availability): string => {
     switch (available) {
       case 'inmediata': return 'bg-green-100 text-green-800';
       case '24h': return 'bg-blue-100 text-blue-800';
