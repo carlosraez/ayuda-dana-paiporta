@@ -11,10 +11,10 @@ export default function Home() {
   const { user } = useAuth();
 
   const handleNavigation = (path: string) => {
-    if (!user && (path.includes('/ayuda/necesito') || path.includes('/ayuda/ofrezco'))) {
+    if (user && (path.includes('/ayuda/necesito') || path.includes('/ayuda/ofrezco'))) {
       router.push('/login');
     } else {
-      router.push(path);
+      console.log(path);
     }
   };
 

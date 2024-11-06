@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { HandHeart } from "lucide-react";
-import ProtectedRoute from "@/components/ProtectedRoute";  // Asegúrate de que la ruta de importación sea correcta
+  // Asegúrate de que la ruta de importación sea correcta
 import { useAuth } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/app/components/ProtectedRoute";
 
 // Define el tipo para las solicitudes
 interface Solicitud {

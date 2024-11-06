@@ -49,7 +49,7 @@ const protectedLinks: NavLink[] = [
     label: 'Necesito Ayuda',
     icon: <AlertCircle className="w-4 h-4" />,
     color: 'text-red-600 hover:text-red-700',
-    requiresAuth: false,
+    requiresAuth: true,
   },
   {
     href: '/ayuda/ofrezco',
@@ -85,7 +85,7 @@ const Navbar = () => {
   const { user, signOut } = useAuth() as AuthContextType;
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-
+  
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -110,19 +110,19 @@ const Navbar = () => {
         </Link>
       ))}
 
-      {user && protectedLinks.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={`flex items-center space-x-1 ${link.color} ${
-            pathname === link.href ? 'font-semibold' : ''
-          } ${mobile ? 'py-2 w-full' : ''}`}
-          onClick={() => mobile && setIsOpen(false)}
-        >
-          {link.icon}
-          <span>{link.label}</span>
-        </Link>
-      ))}
+       {protectedLinks.map((link) => (
+      <Link
+        key={link.href}
+        href={user ? link.href : '/login'}  // Si no hay usuario, redirige al login
+        className={`flex items-center space-x-1 ${link.color} ${
+          pathname === link.href ? 'font-semibold' : ''
+        } ${mobile ? 'py-2 w-full' : ''}`}
+        onClick={() => mobile && setIsOpen(false)}
+      >
+        {link.icon}
+        <span>{link.label}</span>
+      </Link>
+    ))}
     </>
   );
 

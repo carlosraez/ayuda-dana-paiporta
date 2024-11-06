@@ -156,23 +156,43 @@ const PhoneLogin = () => {
     }
   };
 
+  
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
+  
     if (code.length !== 6) {
       setError('El código debe tener 6 dígitos');
       setIsLoading(false);
       return;
     }
-
+  
     try {
       if (!confirmationResult) {
         throw new Error('No hay sesión de verificación activa');
       }
-
-      await confirmationResult.confirm(code);
+  
+      // Confirmar el código y obtener el usuario
+      const userCredential = await confirmationResult.confirm(code);
+      
+      // Obtener el token ID
+      const idToken = await userCredential.user.getIdToken();
+      
+      // Enviar el token al backend para crear la cookie de sesión
+      const response = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al establecer la sesión');
+      }
+  
+      // Continuar con el flujo normal
       setStep('profile');
     } catch (error) {
       console.error('Error al verificar código:', error);

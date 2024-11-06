@@ -14,6 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* Asegúrate de incluir el script de reCAPTCHA */}
+        <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"

@@ -1,3 +1,4 @@
+// app/components/ProtectedRoute.tsx
 'use client';
 
 import { useEffect } from 'react';
@@ -18,22 +19,17 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [user, loading, router]);
 
-  // Mostrar estado de carga
+  // Show nothing while loading
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     );
   }
 
-  // Si no hay usuario, no mostrar nada mientras redirige
-  if (!user) {
-    return null;
-  }
-
-  // Si hay usuario, mostrar el contenido
-  return <>{children}</>;
+  // If not loading and we have a user, show the protected content
+  return user ? <>{children}</> : null;
 };
 
 export default ProtectedRoute;
