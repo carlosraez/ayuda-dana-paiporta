@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import * as React from "react";
 import { useState } from "react";
@@ -7,26 +7,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { HandHeart } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";  // Asegúrate de que la ruta de importación sea correcta
+import { useAuth } from "@/contexts/AuthContext";
 
 // Define el tipo para las solicitudes
-type Solicitud = {
+interface Solicitud {
   id: number;
   tipo: string;
   descripcion: string;
   direccion: string;
   contacto: string;
   estado: string;
-};
+}
 
-export default function NecesitoAyuda() {
-  // Usa el tipo de Solicitud en el estado
+function NecesitoAyudaContent() {
+  const { user } = useAuth();
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [newSolicitud, setNewSolicitud] = useState<Solicitud>({
     id: 0,
     tipo: "",
     descripcion: "",
     direccion: "",
-    contacto: "",
+    contacto: user?.phoneNumber || "",
     estado: "pendiente",
   });
 
@@ -38,7 +40,7 @@ export default function NecesitoAyuda() {
       tipo: "",
       descripcion: "",
       direccion: "",
-      contacto: "",
+      contacto: user?.phoneNumber || "",
       estado: "pendiente",
     });
   };
@@ -153,5 +155,13 @@ export default function NecesitoAyuda() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function NecesitoAyuda() {
+  return (
+    <ProtectedRoute>
+      <NecesitoAyudaContent />
+    </ProtectedRoute>
   );
 }

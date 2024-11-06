@@ -2,23 +2,22 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   Clock, HomeIcon, Search, Package2, ArrowLeftRight, 
-  LogOut, User, AlertCircle, Heart, Eye, Menu, X
+  LogOut, User, AlertCircle, Heart, Eye, Menu
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from '@/contexts/AuthContext';
 
-// Interfaces
 interface AuthContextType {
   user: {
     phoneNumber: string;
   } | null;
+  signOut: () => Promise<void>;
 }
 
-// Definición de tipos para los enlaces
 type NavLink = {
   href: string;
   label: string;
@@ -27,7 +26,6 @@ type NavLink = {
   requiresAuth: boolean;
 };
 
-// Enlaces públicos (siempre visibles)
 const publicLinks: NavLink[] = [
   {
     href: '/',
@@ -45,14 +43,13 @@ const publicLinks: NavLink[] = [
   },
 ];
 
-// Enlaces protegidos (requieren autenticación)
 const protectedLinks: NavLink[] = [
   {
     href: '/ayuda/necesito',
     label: 'Necesito Ayuda',
     icon: <AlertCircle className="w-4 h-4" />,
     color: 'text-red-600 hover:text-red-700',
-    requiresAuth: true,
+    requiresAuth: false,
   },
   {
     href: '/ayuda/ofrezco',
@@ -85,24 +82,27 @@ const protectedLinks: NavLink[] = [
 ];
 
 const Navbar = () => {
-  const { user } = useAuth() as AuthContextType;
+  const { user, signOut } = useAuth() as AuthContextType;
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSignOut = async () => {
-    console.log('cerrar sesion');
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
   };
 
   const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
     <>
-      {/* Enlaces públicos */}
       {publicLinks.map((link) => (
         <Link
           key={link.href}
           href={link.href}
           className={`flex items-center space-x-1 ${link.color} ${
             pathname === link.href ? 'font-semibold' : ''
-          } ${mobile ? 'py-2' : ''}`}
+          } ${mobile ? 'py-2 w-full' : ''}`}
           onClick={() => mobile && setIsOpen(false)}
         >
           {link.icon}
@@ -110,14 +110,13 @@ const Navbar = () => {
         </Link>
       ))}
 
-      {/* Enlaces protegidos */}
       {user && protectedLinks.map((link) => (
         <Link
           key={link.href}
           href={link.href}
           className={`flex items-center space-x-1 ${link.color} ${
             pathname === link.href ? 'font-semibold' : ''
-          } ${mobile ? 'py-2' : ''}`}
+          } ${mobile ? 'py-2 w-full' : ''}`}
           onClick={() => mobile && setIsOpen(false)}
         >
           {link.icon}
@@ -128,7 +127,7 @@ const Navbar = () => {
   );
 
   return (
-    <nav className="border-b">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="max-w-screen-xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}

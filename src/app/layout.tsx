@@ -1,19 +1,17 @@
-'use client'
-
-import './globals.css' 
+import './globals.css';
 import { Inter } from 'next/font/google';
-import ClientLayout from './components/Navigation';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from 'next-themes';
+import Navbar from './components/Navbar';
 
 
 const inter = Inter({ subsets: ['latin'] });
 
-interface RootLayoutProps {
+export default function RootLayout({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
+}) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
@@ -24,7 +22,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
           disableTransitionOnChange
         >
           <AuthProvider>
-            <ClientLayout>{children}</ClientLayout>
+            <Navbar />
+            <main>{children}</main>
           </AuthProvider>
         </ThemeProvider>
       </body>

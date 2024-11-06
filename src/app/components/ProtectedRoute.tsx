@@ -1,24 +1,15 @@
 'use client';
 
-import { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
-}
-
-interface AuthContextType {
-  user: {
-    phoneNumber: string;
-    // Add other user properties as needed
-  } | null;
-  loading: boolean;
+  children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth() as AuthContextType;
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -27,6 +18,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [user, loading, router]);
 
+  // Mostrar estado de carga
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -35,10 +27,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
+  // Si no hay usuario, no mostrar nada mientras redirige
   if (!user) {
     return null;
   }
 
+  // Si hay usuario, mostrar el contenido
   return <>{children}</>;
 };
 
